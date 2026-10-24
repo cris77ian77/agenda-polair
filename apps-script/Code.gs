@@ -65,6 +65,13 @@ function doPost(e) {
       attendees: attendees,
       conferenceData: { createRequest: { requestId: Utilities.getUuid(), conferenceSolutionKey: { type: 'hangoutsMeet' } } }
     }, SETTINGS.CALENDAR_ID, { conferenceDataVersion: 1, sendUpdates: 'all' });
+    try {
+      var cuando = Utilities.formatDate(new Date(slot.start), SETTINGS.TIME_ZONE, "EEEE dd/MM/yyyy HH:mm");
+      MailApp.sendEmail(Session.getEffectiveUser().getEmail(), 'Nueva reserva: ' + name + ' · ' + cuando,
+        'Nueva Reunión Informativa agendada.\n\nCuándo: ' + cuando + ' (hora de Rosario)\nNombre: ' + name + '\nEmail: ' + email +
+        '\n¿De dónde sos?: ' + location + '\n¿Ya fabricás hielo o querés emprender?: ' + experience + '\nWhatsApp: ' + whatsapp +
+        '\nMeet: ' + (event.hangoutLink || '-') + '\nEvento: ' + (event.htmlLink || '-'));
+    } catch (mailError) { console.error(mailError); }
     return json_({ ok: true, start: slot.start, end: slot.end, meetUrl: event.hangoutLink || '', eventId: event.id });
   } catch (error) { console.error(error); return json_({ ok: false, error: error.message || 'No pudimos reservar. Revisá tu correo antes de reintentar.' }); }
   finally { if (locked) lock.releaseLock(); }
